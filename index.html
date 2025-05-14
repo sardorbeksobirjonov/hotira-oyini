@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eslab qol!</title>
+  <script defer src="script.js"></script>
+  <!-- Sahifa haqida umumiy ma’lumot -->
+<meta name="description" content="Eslab qol! - Xotirani sinovdan o‘tkazadigan interaktiv o‘yin. Kodingizni eslab yozing va ball to‘plang!">
+<meta name="keywords" content="eslab qol, xotira o‘yini, kod o‘yini, interaktiv o‘yin, o‘zbekcha o‘yin, onlayn o‘yin">
+<meta name="author" content="Sardor">
+
+<!-- Mobil moslashuv va ilova ko‘rinishi uchun -->
+<meta name="theme-color" content="#6366F1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Ijtimoiy tarmoqlar uchun Open Graph teglar -->
+<meta property="og:title" content="🧠 Eslab qol! - Xotira o‘yini">
+<meta property="og:description" content="Kodlar ketma-ketligini eslab qoling va javob yozing. O‘yin orqali xotirani mashq qiling!">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://eslabqol.example.com">
+<meta property="og:image" content="https://eslabqol.example.com/cover.png"> <!-- rasm bo‘lsa joyini almashtir -->
+
+<!-- Twitter uchun karta -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="🧠 Eslab qol! - Xotira o‘yini">
+<meta name="twitter:description" content="Kodlarni eslab yozing va yuqori ball to‘plang!">
+<meta name="twitter:image" content="https://eslabqol.example.com/cover.png">
+
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .fade-in {
+      animation: fadeIn 1s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @media (max-width: 640px) {
+      .max-w-md { max-width: 100% !important; }
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-300 to-purple-400 min-h-screen flex items-center justify-center p-4">
+
+  <div class="bg-white shadow-2xl rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-6 fade-in">
+    <h1 class="text-3xl font-bold text-gray-800">🧠 Eslab qol!</h1>
+
+    <div id="codeDisplay" class="text-4xl font-mono tracking-widest text-indigo-600 h-12"></div>
+
+    <input id="userInput" type="text" placeholder="Kodni eslab yozing"
+           class="border-2 border-purple-300 rounded-xl p-3 w-full text-center text-xl hidden focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300 shadow-sm" />
+
+    <div class="flex flex-wrap justify-center gap-4">
+      <button id="startBtn"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-5 rounded-xl transition duration-200">
+        Boshlash
+      </button>
+      <button id="stopBtn"
+              class="bg-red-500 hover:bg-red-600 text-white py-2 px-5 rounded-xl transition duration-200 hidden">
+        To‘xtatish
+      </button>
+      <button id="helpBtn"
+              class="bg-yellow-400 hover:bg-yellow-500 text-white py-2 px-5 rounded-xl transition duration-200">
+        Qollanma
+      </button>
+    </div>
+
+    <p id="resultText" class="text-xl font-semibold"></p>
+    <p id="scoreText" class="text-lg text-gray-700">Ball: 0</p>
+    <p id="timeText" class="text-md text-gray-600"></p>
+    <p id="guideText" class="text-sm text-left text-gray-700 hidden border-t border-gray-300 pt-4">
+      🎮 O‘yin qo‘llanmasi: <br/>
+      - "Boshlash" tugmasini bosing <br/>
+      - Kod chiqadi, uni 3 soniya eslab qoling <br/>
+      - Kod yo‘qoladi, inputga yozing va Enter bosing <br/>
+      - To‘g‘ri javob +5 ball, noto‘g‘ri -2 ball <br/>
+      - "To‘xtatish" tugmasi orqali o‘yinni tugatib, natijalarni ko‘ring
+    </p>
+  </div>
+
+  <script>
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const helpBtn = document.getElementById("helpBtn");
+    const codeDisplay = document.getElementById("codeDisplay");
+    const userInput = document.getElementById("userInput");
+    const resultText = document.getElementById("resultText");
+    const scoreText = document.getElementById("scoreText");
+    const timeText = document.getElementById("timeText");
+    const guideText = document.getElementById("guideText");
+
+    let generatedCode = "";
+    let score = 0;
+    let gameActive = false;
+    let startTime, intervalID;
+
+    function generateCode(length = 4) {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      let result = "";
+      for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    }
+
+    function startGame() {
+      if (gameActive) return;
+      gameActive = true;
+      score = 0;
+      updateScore();
+      resultText.textContent = "";
+      timeText.textContent = "";
+      startBtn.classList.add("hidden");
+      stopBtn.classList.remove("hidden");
+      guideText.classList.add("hidden");
+      startTime = Date.now();
+      intervalID = setInterval(updateTime, 1000);
+      showCode();
+    }
+
+    function showCode() {
+      userInput.classList.add("hidden");
+      userInput.value = "";
+      generatedCode = generateCode();
+      codeDisplay.textContent = generatedCode;
+
+      setTimeout(() => {
+        codeDisplay.textContent = "";
+        userInput.classList.remove("hidden");
+        userInput.focus();
+      }, 3000);
+    }
+
+    function checkAnswer() {
+      if (!gameActive) return;
+      const answer = userInput.value.toUpperCase();
+      if (answer === generatedCode) {
+        score += 5;
+        resultText.textContent = "✅ To‘g‘ri! +5 ball";
+        resultText.className = "text-green-600 font-bold text-xl";
+      } else {
+        score -= 2;
+        resultText.textContent = `❌ Xato! To‘g‘risi: ${generatedCode} (-2 ball)`;
+        resultText.className = "text-red-600 font-bold text-xl";
+      }
+      updateScore();
+      showCode();
+    }
+
+    function updateScore() {
+      scoreText.textContent = `Ball: ${score}`;
+    }
+
+    function stopGame() {
+      gameActive = false;
+      userInput.classList.add("hidden");
+      codeDisplay.textContent = "";
+      stopBtn.classList.add("hidden");
+      startBtn.classList.remove("hidden");
+      resultText.textContent = `O‘yin tugadi. Jami ball: ${score}`;
+      resultText.className = "text-indigo-700 font-semibold text-lg";
+      updateTime(true);
+    }
+
+    function updateTime(final = false) {
+      const now = Date.now();
+      const diff = now - startTime;
+      const mins = Math.floor(diff / 60000);
+      const secs = Math.floor((diff % 60000) / 1000);
+      timeText.textContent = `Davomiyligi: ${mins} daqiqa ${secs} soniya`;
+      if (final) clearInterval(intervalID);
+    }
+
+    startBtn.addEventListener("click", startGame);
+    stopBtn.addEventListener("click", stopGame);
+
+    helpBtn.addEventListener("click", () => {
+      guideText.classList.toggle("hidden");
+    });
+
+    userInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        checkAnswer();
+      }
+    });
+  </script>
+
+</body>
+</html>
